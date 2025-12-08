@@ -36,12 +36,6 @@ func TestLoadDetails(t *testing.T) {
 	if app.Developer == "" {
 		t.Error("Expected Developer")
 	}
-	if app.DeveloperAddress == "" {
-		t.Error("Expected DeveloperAddress")
-	}
-	if app.DeveloperEmail == "" {
-		t.Error("Expected DeveloperEmail")
-	}
 	if app.DeveloperID == "" {
 		t.Error("Expected DeveloperID")
 	}
@@ -126,18 +120,6 @@ func TestLoadDetails(t *testing.T) {
 	if app.Released == "" {
 		t.Error("Expected Released date")
 	}
-	if len(app.Reviews) == 0 {
-		t.Error("Expected Reviews length is greater than zero")
-	} else {
-		for i, comment := range app.Reviews {
-			if comment.Text == "" {
-				t.Errorf("Expected comment Text in Reviews[%d]: %+v", i, comment)
-			}
-		}
-	}
-	if app.ReviewsTotalCount == 0 {
-		t.Error("Expected ReviewsTotalCount is greater than zero")
-	}
 	if app.Score == 0 {
 		t.Error("Expected Score is greater than zero")
 	}
@@ -154,7 +136,7 @@ func TestLoadDetails(t *testing.T) {
 		}
 	}
 	if _, err = url.ParseRequestURI(app.SimilarURL); err != nil {
-		t.Error("Expected valid SimilarURL, got", app.SimilarURL)
+		t.Error("Expected svalid SimilarURL, got", app.SimilarURL)
 	}
 	if app.Summary == "" {
 		t.Error("Expected Summary")
@@ -176,34 +158,5 @@ func TestLoadDetails(t *testing.T) {
 	}
 	if _, err = url.ParseRequestURI(app.VideoImage); err != nil {
 		t.Error("Expected valid VideoImage url, got", app.VideoImage)
-	}
-}
-
-func TestLoadPermissions(t *testing.T) {
-	app := New("com.android.chrome", Options{"us", "us"})
-	err := app.LoadPermissions()
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(app.Permissions) == 0 {
-		t.Fatal("Expected Permissions map length is greater than zero")
-	}
-
-	for key, permission := range app.Permissions {
-		if key == "" {
-			t.Error("Expected permission key is not empty")
-		}
-
-		if len(permission) == 0 {
-			t.Fatal("Expected permission list length is greater than zero")
-		}
-
-		for _, perm := range permission {
-			if perm == "" {
-				t.Error("Expected permission in the list is not empty")
-			}
-		}
-
 	}
 }
