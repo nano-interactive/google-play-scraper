@@ -8,7 +8,6 @@ import (
 
 	"github.com/nano-interactive/google-play-scraper/internal/parse"
 	"github.com/nano-interactive/google-play-scraper/internal/util"
-	"github.com/nano-interactive/google-play-scraper/pkg/reviews"
 )
 
 const (
@@ -61,8 +60,6 @@ type App struct {
 	RecentChanges            string
 	RecentChangesHTML        string
 	Released                 string
-	Reviews                  []*reviews.Review
-	ReviewsTotalCount        int
 	Score                    float64
 	ScoreText                string
 	Screenshots              []string
@@ -120,7 +117,7 @@ func (app *App) LoadDetails() error {
 
 		app.AdSupported = util.GetJSONValue(appData[dsAppInfo], "1.2.48") != ""
 
-		app.AndroidVersion = util.GetJSONValue(appData[dsAppInfo], "1.2.140.1.1.0.0.1")
+		app.AndroidVersion = util.GetJSONValue(appData[dsAppInfo], "1.2.140.1.1.0.0.1", "1.2.112.141.1.1.0.0.1")
 		app.AndroidVersionMin = parse.Float(app.AndroidVersion)
 
 		app.Available = util.GetJSONValue(appData[dsAppInfo], "1.2.18.0") != ""
@@ -178,21 +175,6 @@ func (app *App) LoadDetails() error {
 			5: parse.Int(util.GetJSONValue(appData[dsAppInfo], "1.2.51.1.5.1")),
 		}
 
-		for dsAppReview := range appData {
-			reviewList := util.GetJSONArray(appData[dsAppReview], "0")
-			check := util.GetJSONValue(appData[dsAppReview], "2.0.1.2.0")
-			if len(reviewList) > 2 && check != "" {
-				for _, review := range reviewList {
-					r := reviews.Parse(review.String())
-					if r != nil {
-						app.Reviews = append(app.Reviews, r)
-					}
-				}
-				break
-			}
-		}
-		app.ReviewsTotalCount = parse.Int(util.GetJSONValue(appData[dsAppInfo], "1.2.51.2.1"))
-
 		screenshots := util.GetJSONArray(appData[dsAppInfo], "1.2.78.0")
 		for _, screen := range screenshots {
 			app.Screenshots = append(app.Screenshots, util.GetJSONValue(screen.String(), "3.2"))
@@ -206,15 +188,15 @@ func (app *App) LoadDetails() error {
 			}
 		}
 
-		app.RecentChangesHTML = util.GetJSONValue(appData[dsAppInfo], "1.2.144.1.1", "1.2.145.0.0")
+		app.RecentChangesHTML = util.GetJSONValue(appData[dsAppInfo], "1.2.144.1.1", "1.2.145.0.0", "1.2.112.146.0.0")
 		app.RecentChanges = util.HTMLToText(app.RecentChangesHTML)
 		app.Released = util.GetJSONValue(appData[dsAppInfo], "1.2.10.0")
 		app.Score = parse.Float(util.GetJSONValue(appData[dsAppInfo], "1.2.51.0.1"))
 		app.ScoreText = util.GetJSONValue(appData[dsAppInfo], "1.2.51.0.0")
 		app.Summary = util.GetJSONValue(appData[dsAppInfo], "1.2.73.0.1")
 		app.Title = util.GetJSONValue(appData[dsAppInfo], "1.2.0.0")
-		app.Updated = time.Unix(parse.Int64(util.GetJSONValue(appData[dsAppInfo], "1.2.145.0.1.0")), 0)
-		app.Version = util.GetJSONValue(appData[dsAppInfo], "1.2.140.0.0.0")
+		app.Updated = time.Unix(parse.Int64(util.GetJSONValue(appData[dsAppInfo], "1.2.145.0.1.0", "1.2.112.146.0.1.0")), 0)
+		app.Version = util.GetJSONValue(appData[dsAppInfo], "1.2.140.0.0.0", "1.2.112.141.0.0.0")
 		app.Video = util.GetJSONValue(appData[dsAppInfo], "1.2.100.0.0.3.2")
 		app.VideoImage = util.GetJSONValue(appData[dsAppInfo], "1.2.100.1.0.3.2")
 	}
