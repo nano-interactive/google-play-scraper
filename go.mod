@@ -1,6 +1,6 @@
 module github.com/nano-interactive/google-play-scraper
 
-go 1.25
+go 1.25.3
 
 require (
 	github.com/k3a/html2text v1.2.1
