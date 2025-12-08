@@ -16,6 +16,10 @@ go get -u github.com/nano-interactive/google-play-scraper/
 
 ## Usage
 
+> [!WARNING]
+>
+> Methods other than LoadDetails are not maintained and can return wrong response or error
+
 ### Get app details
 
 Retrieves the full detail of an application.
@@ -24,27 +28,20 @@ Retrieves the full detail of an application.
 package main
 
 import (
-    "github.com/davecgh/go-spew/spew"
-    "github.com/nano-interactive/google-play-scraper/pkg/app"
+	"fmt"
+	scraper "github.com/nano-interactive/google-play-scraper"
 )
 
 func main() {
-    a := app.New("com.google.android.googlequicksearchbox", app.Options{
-        Country:  "us",
-        Language: "us",
-    })
-    err := a.LoadDetails()
-    if err != nil {
-        panic(err)
-    }
-    err = a.LoadPermissions()
-    if err != nil {
-        panic(err)
-    }
-    spew.Dump(a)
+	appDetails := scraper.New("com.google.android.googlequicksearchbox", scraper.Options{
+		Country:  "us",
+		Language: "us",
+	})
+	err := appDetails.LoadDetails()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(appDetails)
 }
 ```
-
-> [!WARNING]
-> 
-> Methods other than LoadDetails are not maintained and can return wrong response or error

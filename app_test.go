@@ -1,4 +1,4 @@
-package app
+package google_play_scraper
 
 import (
 	"net/url"

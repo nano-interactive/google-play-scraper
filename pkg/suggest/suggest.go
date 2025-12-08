@@ -1,12 +1,12 @@
 package suggest
 
 import (
+	"github.com/nano-interactive/google-play-scraper"
 	"github.com/nano-interactive/google-play-scraper/internal/util"
-	"github.com/nano-interactive/google-play-scraper/pkg/app"
 )
 
 // Options type alias
-type Options = app.Options
+type Options = google_play_scraper.Options
 
 // Get returns up to five suggestion to complete a search query term
 func Get(term string, options Options) (list []string, err error) {

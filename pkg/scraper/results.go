@@ -1,12 +1,14 @@
 package scraper
 
-import "github.com/nano-interactive/google-play-scraper/pkg/app"
+import (
+	"github.com/nano-interactive/google-play-scraper"
+)
 
 // Results of operation
-type Results []*app.App
+type Results []*google_play_scraper.App
 
 // Append result
-func (results *Results) Append(res ...app.App) {
+func (results *Results) Append(res ...google_play_scraper.App) {
 	for _, result := range res {
 		if !results.searchDuplicate(result.ID) {
 			results.append(result)
@@ -14,7 +16,7 @@ func (results *Results) Append(res ...app.App) {
 	}
 }
 
-func (results *Results) append(result app.App) {
+func (results *Results) append(result google_play_scraper.App) {
 	*results = append(*results, &result)
 }
 

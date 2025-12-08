@@ -1,7 +1,7 @@
 package similar
 
 import (
-	"github.com/nano-interactive/google-play-scraper/pkg/app"
+	"github.com/nano-interactive/google-play-scraper"
 	"github.com/nano-interactive/google-play-scraper/pkg/scraper"
 )
 
@@ -10,7 +10,7 @@ type Options = scraper.Options
 
 // New return similar list instance
 func New(appID string, options Options) *scraper.Scraper {
-	a := app.New(appID, app.Options{
+	a := google_play_scraper.New(appID, google_play_scraper.Options{
 		Country:  options.Country,
 		Language: options.Language,
 	})

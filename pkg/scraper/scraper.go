@@ -1,13 +1,13 @@
 package scraper
 
 import (
+	"github.com/nano-interactive/google-play-scraper"
 	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/nano-interactive/google-play-scraper/internal/parse"
 	"github.com/nano-interactive/google-play-scraper/internal/util"
-	"github.com/nano-interactive/google-play-scraper/pkg/app"
 )
 
 // BaseURL of Google Play Store
@@ -32,7 +32,7 @@ type Scraper struct {
 	url     string
 }
 
-func (scraper *Scraper) initialRequest() ([]app.App, string, error) {
+func (scraper *Scraper) initialRequest() ([]google_play_scraper.App, string, error) {
 	req, err := http.NewRequest("GET", scraper.url, nil)
 	if err != nil {
 		return nil, "", err
@@ -61,7 +61,7 @@ func (scraper *Scraper) initialRequest() ([]app.App, string, error) {
 	return apps, token, nil
 }
 
-func (scraper *Scraper) batchexecute(token string) ([]app.App, string, error) {
+func (scraper *Scraper) batchexecute(token string) ([]google_play_scraper.App, string, error) {
 	payload := strings.Replace("f.req=%5B%5B%5B%22qnKhOb%22%2C%22%5B%5Bnull%2C%5B%5B10%2C%5B10%2C50%5D%5D%2Ctrue%2Cnull%2C%5B96%2C27%2C4%2C8%2C57%2C30%2C110%2C79%2C11%2C16%2C49%2C1%2C3%2C9%2C12%2C104%2C55%2C56%2C51%2C10%2C34%2C77%5D%5D%2Cnull%2C%5C%22{{token}}%5C%22%5D%5D%22%2Cnull%2C%22generic%22%5D%5D%5D", "{{token}}", token, 1)
 
 	js, err := util.BatchExecute(scraper.options.Country, scraper.options.Language, payload)
@@ -118,7 +118,7 @@ func (scraper *Scraper) LoadMoreDetails(maxWorkers int) (errors []error) {
 	for _, result := range scraper.Results {
 		semaphore <- struct{}{}
 		wg.Add(1)
-		go func(result *app.App) {
+		go func(result *google_play_scraper.App) {
 			defer wg.Done()
 			err := result.LoadDetails()
 			if err != nil {
@@ -134,11 +134,11 @@ func (scraper *Scraper) LoadMoreDetails(maxWorkers int) (errors []error) {
 	return
 }
 
-func (scraper *Scraper) parseResult(data string, paths ...string) (results []app.App) {
+func (scraper *Scraper) parseResult(data string, paths ...string) (results []google_play_scraper.App) {
 	for _, path := range paths {
 		appData := util.GetJSONArray(data, path)
 		for _, ap := range appData {
-			price := app.Price{
+			price := google_play_scraper.Price{
 				Currency: util.GetJSONValue(ap.String(), "0.8.1.0.1", "8.1.0.1", "7.0.3.2.1.0.1"),
 				Value:    parse.Float(util.GetJSONValue(ap.String(), "0.8.1.0.2", "8.1.0.2", "7.0.3.2.1.0.2")),
 			}
@@ -147,7 +147,7 @@ func (scraper *Scraper) parseResult(data string, paths ...string) (results []app
 				continue
 			}
 
-			priceFull := app.Price{
+			priceFull := google_play_scraper.Price{
 				Currency: util.GetJSONValue(ap.String(), "0.8.1.0.1", "8.1.0.1", "7.0.3.2.1.1.1"),
 				Value:    parse.Float(util.GetJSONValue(ap.String(), "0.8.1.0.0", "8.1.0.0", "7.0.3.2.1.1.2")),
 			}
@@ -161,7 +161,7 @@ func (scraper *Scraper) parseResult(data string, paths ...string) (results []app
 				continue
 			}
 
-			application := app.New(util.GetJSONValue(ap.String(), "0.0.0", "0.0", "12.0"), app.Options{
+			application := google_play_scraper.New(util.GetJSONValue(ap.String(), "0.0.0", "0.0", "12.0"), google_play_scraper.Options{
 				Country:  scraper.options.Country,
 				Language: scraper.options.Language,
 			})
