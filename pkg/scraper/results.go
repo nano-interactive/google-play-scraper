@@ -1,6 +1,6 @@
 package scraper
 
-import "github.com/n0madic/google-play-scraper/pkg/app"
+import "github.com/nano-interactive/google-play-scraper/pkg/app"
 
 // Results of operation
 type Results []*app.App

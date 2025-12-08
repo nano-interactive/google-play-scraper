@@ -1,8 +1,8 @@
 package suggest
 
 import (
-	"github.com/n0madic/google-play-scraper/internal/util"
-	"github.com/n0madic/google-play-scraper/pkg/app"
+	"github.com/nano-interactive/google-play-scraper/internal/util"
+	"github.com/nano-interactive/google-play-scraper/pkg/app"
 )
 
 // Options type alias
