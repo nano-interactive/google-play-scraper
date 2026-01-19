@@ -1,7 +1,7 @@
 package google_play_scraper
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -10,82 +10,99 @@ import (
 	"github.com/nano-interactive/google-play-scraper/internal/util"
 )
 
+type (
+	Price struct {
+		Currency string
+		Value    float64
+	}
+
+	App struct {
+		AdSupported              bool
+		AndroidVersion           string
+		AndroidVersionMin        float64
+		Available                bool
+		ContentRating            string
+		ContentRatingDescription string
+		Description              string
+		DescriptionHTML          string
+		Developer                string
+		DeveloperID              string
+		DeveloperInternalID      string
+		DeveloperURL             string
+		DeveloperWebsite         string
+		FamilyGenre              string
+		FamilyGenreID            string
+		Free                     bool
+		Genre                    string
+		GenreID                  string
+		HeaderImage              string
+		IAPOffers                bool
+		IAPRange                 string
+		Icon                     string
+		ID                       string
+		Installs                 string
+		InstallsMin              int
+		InstallsMax              int
+		Permissions              map[string][]string
+		Price                    Price
+		PriceFull                Price
+		PrivacyPolicy            string
+		Ratings                  int
+		RatingsHistogram         map[int]int
+		RecentChanges            string
+		RecentChangesHTML        string
+		Released                 string
+		Score                    float64
+		ScoreText                string
+		Screenshots              []string
+		SimilarURL               string
+		Summary                  string
+		Title                    string
+		Updated                  time.Time
+		URL                      string
+		Version                  string
+		Video                    string
+		VideoImage               string
+
+		options *Options
+		client  HTTPClient
+	}
+
+	Options struct {
+		Country  string
+		Language string
+	}
+)
+
 const (
 	detailURL = "https://play.google.com/store/apps/details?id="
 	playURL   = "https://play.google.com"
+
+	GeographicLocation = "gl"
+	HostLanguage       = "hl"
 )
 
-// Price of app
-type Price struct {
-	Currency string
-	Value    float64
+var (
+	ErrRequiredFieldsMissing = errors.New("app URL or ID must be provided")
+)
+
+func New(id string, options Options, client HTTPClient) *App {
+	return &App{
+		ID:      id,
+		URL:     detailURL + id,
+		options: &options,
+		client:  client,
+	}
 }
 
-// App of search
-type App struct {
-	AdSupported              bool
-	AndroidVersion           string
-	AndroidVersionMin        float64
-	Available                bool
-	ContentRating            string
-	ContentRatingDescription string
-	Description              string
-	DescriptionHTML          string
-	Developer                string
-	DeveloperID              string
-	DeveloperInternalID      string
-	DeveloperURL             string
-	DeveloperWebsite         string
-	FamilyGenre              string
-	FamilyGenreID            string
-	Free                     bool
-	Genre                    string
-	GenreID                  string
-	HeaderImage              string
-	IAPOffers                bool
-	IAPRange                 string
-	Icon                     string
-	ID                       string
-	Installs                 string
-	InstallsMin              int
-	InstallsMax              int
-	Permissions              map[string][]string
-	Price                    Price
-	PriceFull                Price
-	PrivacyPolicy            string
-	Ratings                  int
-	RatingsHistogram         map[int]int
-	RecentChanges            string
-	RecentChangesHTML        string
-	Released                 string
-	Score                    float64
-	ScoreText                string
-	Screenshots              []string
-	SimilarURL               string
-	Summary                  string
-	Title                    string
-	Updated                  time.Time
-	URL                      string
-	Version                  string
-	Video                    string
-	VideoImage               string
-	options                  *Options
-}
-
-// Options of app
-type Options struct {
-	Country  string
-	Language string
-}
-
-// LoadDetails of app
+// LoadDetails loads page and maps app details into App
 func (app *App) LoadDetails() error {
+	if app.URL == "" && app.ID == "" {
+		return ErrRequiredFieldsMissing
+	}
+
 	if app.URL == "" {
-		if app.ID != "" {
-			app.URL = detailURL + app.ID
-		} else {
-			return fmt.Errorf("App ID or URL required")
-		}
+		app.URL = detailURL + app.ID
 	}
 
 	req, err := http.NewRequest("GET", app.URL, nil)
@@ -94,8 +111,8 @@ func (app *App) LoadDetails() error {
 	}
 
 	q := req.URL.Query()
-	q.Add("gl", app.options.Country)
-	q.Add("hl", app.options.Language)
+	q.Add(GeographicLocation, app.options.Country)
+	q.Add(HostLanguage, app.options.Language)
 	req.URL.RawQuery = q.Encode()
 
 	appData, err := util.GetInitData(req)
@@ -103,6 +120,12 @@ func (app *App) LoadDetails() error {
 		return err
 	}
 
+	app.MapResponseToApp(appData)
+
+	return nil
+}
+
+func (app *App) MapResponseToApp(appData map[string]string) {
 	if app.ID == "" {
 		app.ID = parse.ID(app.URL)
 	}
@@ -196,7 +219,6 @@ func (app *App) LoadDetails() error {
 		app.Video = util.GetJSONValue(appData[dsAppInfo], "1.2.100.0.0.3.2")
 		app.VideoImage = util.GetJSONValue(appData[dsAppInfo], "1.2.100.1.0.3.2")
 	}
-	return nil
 }
 
 // LoadPermissions get the list of perms an app has access to
@@ -217,13 +239,4 @@ func (app *App) LoadPermissions() error {
 	}
 
 	return nil
-}
-
-// New return App instance
-func New(id string, options Options) *App {
-	return &App{
-		ID:      id,
-		URL:     detailURL + id,
-		options: &options,
-	}
 }
