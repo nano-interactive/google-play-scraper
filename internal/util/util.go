@@ -110,33 +110,6 @@ func GetJSONValue(data string, paths ...string) string {
 	return ""
 }
 
-// DoRequest by HTTP and read all
-func DoRequest(req *http.Request) ([]byte, error) {
-	client := http.DefaultClient
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request error: %s", resp.Status)
-	}
-
-	return io.ReadAll(resp.Body)
-}
-
-// GetInitData from Google HTML
-func GetInitData(req *http.Request) (map[string]string, error) {
-	html, err := DoRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	return ExtractInitData(html), nil
-}
-
 // HTMLToText return plain text from HTML
 func HTMLToText(html string) string {
 	html2text.SetUnixLbr(true)

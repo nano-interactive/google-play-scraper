@@ -2,6 +2,8 @@ package google_play_scraper
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -105,17 +107,7 @@ func (app *App) LoadDetails() error {
 		app.URL = detailURL + app.ID
 	}
 
-	req, err := http.NewRequest("GET", app.URL, nil)
-	if err != nil {
-		return err
-	}
-
-	q := req.URL.Query()
-	q.Add(GeographicLocation, app.options.Country)
-	q.Add(HostLanguage, app.options.Language)
-	req.URL.RawQuery = q.Encode()
-
-	appData, err := util.GetInitData(req)
+	appData, err := app.fetchAndExtractData()
 	if err != nil {
 		return err
 	}
@@ -239,4 +231,34 @@ func (app *App) LoadPermissions() error {
 	}
 
 	return nil
+}
+
+func (app *App) fetchAndExtractData() (map[string]string, error) {
+	req, err := http.NewRequest("GET", app.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	q := req.URL.Query()
+	q.Add(GeographicLocation, app.options.Country)
+	q.Add(HostLanguage, app.options.Language)
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := app.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close() // TODO: add logger and log error if it occurs
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request error: %s", resp.Status)
+	}
+
+	html, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	appData := util.ExtractInitData(html)
+	return appData, nil
 }
