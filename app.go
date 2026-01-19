@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/nano-interactive/google-play-scraper/internal/parse"
@@ -211,26 +210,6 @@ func (app *App) MapResponseToApp(appData map[string]string) {
 		app.Video = util.GetJSONValue(appData[dsAppInfo], "1.2.100.0.0.3.2")
 		app.VideoImage = util.GetJSONValue(appData[dsAppInfo], "1.2.100.1.0.3.2")
 	}
-}
-
-// LoadPermissions get the list of perms an app has access to
-func (app *App) LoadPermissions() error {
-	payload := strings.Replace("f.req=%5B%5B%5B%22xdSrCf%22%2C%22%5B%5Bnull%2C%5B%5C%22{{appID}}%5C%22%2C7%5D%2C%5B%5D%5D%5D%22%2Cnull%2C%221%22%5D%5D%5D", "{{appID}}", app.ID, 1)
-
-	js, err := util.BatchExecute(app.options.Country, app.options.Language, payload)
-	if err != nil {
-		return err
-	}
-
-	app.Permissions = make(map[string][]string)
-	for _, perm := range util.GetJSONArray(js, "0") {
-		key := util.GetJSONValue(perm.String(), "0")
-		for _, permission := range util.GetJSONArray(perm.String(), "2") {
-			app.Permissions[key] = append(app.Permissions[key], util.GetJSONValue(permission.String(), "1"))
-		}
-	}
-
-	return nil
 }
 
 func (app *App) fetchAndExtractData() (map[string]string, error) {

@@ -1,12 +1,13 @@
 package google_play_scraper
 
 import (
+	"net/http"
 	"net/url"
 	"testing"
 )
 
 func TestLoadDetails(t *testing.T) {
-	app := New("com.nekki.vector.paid", Options{"us", "en"})
+	app := New("com.nekki.vector.paid", Options{"us", "en"}, http.DefaultClient)
 	err := app.LoadDetails()
 	if err != nil {
 		t.Error(err)

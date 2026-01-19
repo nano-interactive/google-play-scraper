@@ -1,23 +1,16 @@
 package util
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"regexp"
-	"strings"
-
 	"github.com/k3a/html2text"
 	"github.com/tidwall/gjson"
+	"net/url"
+	"regexp"
 )
 
 var (
-	scriptRegex = regexp.MustCompile(`>AF_initDataCallback[\s\S]*?<\/script`)
+	scriptRegex = regexp.MustCompile(`>AF_initDataCallback[\s\S]*?</script`)
 	keyRegex    = regexp.MustCompile(`(ds:\d*?)'`)
-	valueRegex  = regexp.MustCompile(`data:([\s\S]*?), sideChannel: {}}\);<\/`)
+	valueRegex  = regexp.MustCompile(`data:([\s\S]*?), sideChannel: {}}\);</`)
 )
 
 // AbsoluteURL return absolute url
@@ -31,47 +24,6 @@ func AbsoluteURL(base, path string) (string, error) {
 		return "", err
 	}
 	return b.ResolveReference(p).String(), nil
-}
-
-// BatchExecute for PlayStoreUi
-func BatchExecute(country, language, payload string) (string, error) {
-	url := "https://play.google.com/_/PlayStoreUi/data/batchexecute"
-
-	req, err := http.NewRequest("POST", url, strings.NewReader(payload))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
-
-	q := req.URL.Query()
-	q.Add("authuser", "0")
-	q.Add("bl", "boq_playuiserver_20190424.04_p0")
-	q.Add("gl", country)
-	q.Add("hl", language)
-	q.Add("soc-app", "121")
-	q.Add("soc-platform", "1")
-	q.Add("soc-device", "1")
-	q.Add("rpcids", "qnKhOb")
-	req.URL.RawQuery = q.Encode()
-
-	body, err := DoRequest(req)
-	if err != nil {
-		return "", err
-	}
-
-	var js [][]interface{}
-	err = json.Unmarshal(bytes.TrimLeft(body, ")]}'"), &js)
-	if err != nil {
-		return "", err
-	}
-	if len(js) < 1 || len(js[0]) < 2 {
-		return "", fmt.Errorf("invalid size of the resulting array")
-	}
-	if js[0][2] == nil {
-		return "", nil
-	}
-
-	return js[0][2].(string), nil
 }
 
 // ExtractInitData from Google HTML
@@ -112,6 +64,5 @@ func GetJSONValue(data string, paths ...string) string {
 
 // HTMLToText return plain text from HTML
 func HTMLToText(html string) string {
-	html2text.SetUnixLbr(true)
-	return html2text.HTML2Text(html)
+	return html2text.HTML2TextWithOptions(html, html2text.WithUnixLineBreaks())
 }
