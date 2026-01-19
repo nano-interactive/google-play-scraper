@@ -3,6 +3,7 @@ package google_play_scraper
 import (
 	"errors"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
 	"time"
@@ -111,12 +112,12 @@ func (app *App) LoadDetails() error {
 		return err
 	}
 
-	app.MapResponseToApp(appData)
+	app.mapResponseToApp(appData)
 
 	return nil
 }
 
-func (app *App) MapResponseToApp(appData map[string]string) {
+func (app *App) mapResponseToApp(appData map[string]string) {
 	if app.ID == "" {
 		app.ID = parse.ID(app.URL)
 	}
@@ -227,7 +228,11 @@ func (app *App) fetchAndExtractData() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close() // TODO: add logger and log error if it occurs
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close response body")
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("request error: %s", resp.Status)
