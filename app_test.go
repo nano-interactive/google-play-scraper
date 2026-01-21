@@ -1,12 +1,15 @@
 package google_play_scraper
 
 import (
+	"net/http"
 	"net/url"
 	"testing"
 )
 
+// TestLoadDetails test scraper by scraping real data
+// source: https://play.google.com/store/apps/details?id=com.nekki.vector.paid
 func TestLoadDetails(t *testing.T) {
-	app := New("com.nekki.vector.paid", Options{"us", "en"})
+	app := New("com.nekki.vector.paid", Options{"us", "en"}, http.DefaultClient)
 	err := app.LoadDetails()
 	if err != nil {
 		t.Error(err)

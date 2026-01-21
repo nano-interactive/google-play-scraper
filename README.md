@@ -18,7 +18,8 @@ go get -u github.com/nano-interactive/google-play-scraper@v0.0.1
 
 > [!WARNING]
 >
-> Methods other than LoadDetails are not maintained and can return wrong response or error
+> Methods other than LoadDetails are not maintained and therefore currently deleted.
+> If any additional functionality is needed, refer to original repository
 
 ### Get app details
 
@@ -30,13 +31,14 @@ package main
 import (
 	"fmt"
 	scraper "github.com/nano-interactive/google-play-scraper"
+	"net/http"
 )
 
 func main() {
 	appDetails := scraper.New("com.google.android.googlequicksearchbox", scraper.Options{
 		Country:  "us",
 		Language: "us",
-	})
+	}, http.DefaultClient)
 	err := appDetails.LoadDetails()
 	if err != nil {
 		panic(err)
