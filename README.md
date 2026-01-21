@@ -11,7 +11,7 @@ This project is inspired by the [google-play-scraper](https://github.com/facundo
 ## Installation
 
 ```shell
-go get -u github.com/nano-interactive/google-play-scraper@v0.0.1
+go get -u github.com/nano-interactive/google-play-scraper@v0.1.0
 ```
 
 ## Usage
