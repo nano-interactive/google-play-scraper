@@ -86,6 +86,7 @@ const (
 
 var (
 	ErrRequiredFieldsMissing = errors.New("app URL or ID must be provided")
+	ErrNotFound              = errors.New("app by ID doesn't exist on app store")
 )
 
 func New(id string, options Options, client HTTPClient) *App {
@@ -235,6 +236,10 @@ func (app *App) fetchAndExtractData() (map[string]string, error) {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, ErrNotFound
+		}
+		
 		return nil, fmt.Errorf("request error: %s", resp.Status)
 	}
 
