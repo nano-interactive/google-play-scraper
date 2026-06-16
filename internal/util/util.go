@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	scriptRegex = regexp.MustCompile(`>AF_initDataCallback[\s\S]*?</script`)
-	keyRegex    = regexp.MustCompile(`(ds:\d*?)'`)
-	valueRegex  = regexp.MustCompile(`data:([\s\S]*?), sideChannel: {}}\);</`)
+	scriptRegex       = regexp.MustCompile(`>AF_initDataCallback[\s\S]*?</script`)
+	keyRegex          = regexp.MustCompile(`(ds:\d*?)'`)
+	valueRegex        = regexp.MustCompile(`data:([\s\S]*?), sideChannel: {}}\);</`)
+	tvFormFactorRegex = regexp.MustCompile(`id="formFactor_6"`)
 )
 
 // AbsoluteURL return absolute url
@@ -38,6 +39,12 @@ func ExtractInitData(html []byte) map[string]string {
 		}
 	}
 	return data
+}
+
+// IsAvailableOnTV reports whether the Play Store page advertises a TV device tab
+// (rendered server-side as a button with id="formFactor_6") in the ratings section.
+func IsAvailableOnTV(html []byte) bool {
+	return tvFormFactorRegex.Match(html)
 }
 
 // GetJSONArray by path

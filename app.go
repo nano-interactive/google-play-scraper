@@ -65,6 +65,7 @@ type (
 		Version                  string
 		Video                    string
 		VideoImage               string
+		AvailableOnTV            bool
 
 		options *Options
 		client  HTTPClient
@@ -108,12 +109,13 @@ func (app *App) LoadDetails() error {
 		app.URL = detailURL + app.ID
 	}
 
-	appData, err := app.fetchAndExtractData()
+	appData, html, err := app.fetchAndExtractData()
 	if err != nil {
 		return err
 	}
 
 	app.mapResponseToApp(appData)
+	app.AvailableOnTV = util.IsAvailableOnTV(html)
 
 	return nil
 }
@@ -214,10 +216,10 @@ func (app *App) mapResponseToApp(appData map[string]string) {
 	}
 }
 
-func (app *App) fetchAndExtractData() (map[string]string, error) {
+func (app *App) fetchAndExtractData() (map[string]string, []byte, error) {
 	req, err := http.NewRequest("GET", app.URL, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	q := req.URL.Query()
@@ -227,7 +229,7 @@ func (app *App) fetchAndExtractData() (map[string]string, error) {
 
 	resp, err := app.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
@@ -237,17 +239,17 @@ func (app *App) fetchAndExtractData() (map[string]string, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			return nil, ErrNotFound
+			return nil, nil, ErrNotFound
 		}
-		
-		return nil, fmt.Errorf("request error: %s", resp.Status)
+
+		return nil, nil, fmt.Errorf("request error: %s", resp.Status)
 	}
 
 	html, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	appData := util.ExtractInitData(html)
-	return appData, nil
+	return appData, html, nil
 }

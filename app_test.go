@@ -162,4 +162,21 @@ func TestLoadDetails(t *testing.T) {
 	if _, err = url.ParseRequestURI(app.VideoImage); err != nil {
 		t.Error("Expected valid VideoImage url, got", app.VideoImage)
 	}
+	if app.AvailableOnTV {
+		t.Error("Expected AvailableOnTV is false, got", app.AvailableOnTV)
+	}
+}
+
+// TestLoadDetails_AvailableOnTV checks an app that is only distributed on Android TV
+// source: https://play.google.com/store/apps/details?id=com.netflix.ninja
+func TestLoadDetails_AvailableOnTV(t *testing.T) {
+	app := New("com.netflix.ninja", Options{"us", "en"}, http.DefaultClient)
+	err := app.LoadDetails()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !app.AvailableOnTV {
+		t.Error("Expected AvailableOnTV is true, got", app.AvailableOnTV)
+	}
 }
