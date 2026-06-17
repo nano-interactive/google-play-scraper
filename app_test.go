@@ -120,7 +120,7 @@ func TestLoadDetails(t *testing.T) {
 	if app.RecentChangesHTML == "" {
 		t.Error("Expected RecentChangesHTML")
 	}
-	if app.Released == "" {
+	if app.Released.IsZero() {
 		t.Error("Expected Released date")
 	}
 	if app.Score == 0 {

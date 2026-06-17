@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Float parse from string
@@ -15,6 +16,15 @@ func Float(str string) float64 {
 		return 0
 	}
 	return f
+}
+
+// Date parses a "Jan 2, 2006" formatted string into time.Time
+func Date(str string) time.Time {
+	t, err := time.Parse("Jan 2, 2006", str)
+	if err != nil {
+		return time.Time{}
+	}
+	return t
 }
 
 // ID parse return ID value from url

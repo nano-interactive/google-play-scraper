@@ -53,7 +53,7 @@ type (
 		RatingsHistogram         map[int]int
 		RecentChanges            string
 		RecentChangesHTML        string
-		Released                 string
+		Released                 time.Time
 		Score                    float64
 		ScoreText                string
 		Screenshots              []string
@@ -204,7 +204,7 @@ func (app *App) mapResponseToApp(appData map[string]string) {
 
 		app.RecentChangesHTML = util.GetJSONValue(appData[dsAppInfo], "1.2.144.1.1", "1.2.145.0.0", "1.2.112.146.0.0")
 		app.RecentChanges = util.HTMLToText(app.RecentChangesHTML)
-		app.Released = util.GetJSONValue(appData[dsAppInfo], "1.2.10.0")
+		app.Released = parse.Date(util.GetJSONValue(appData[dsAppInfo], "1.2.10.0"))
 		app.Score = parse.Float(util.GetJSONValue(appData[dsAppInfo], "1.2.51.0.1"))
 		app.ScoreText = util.GetJSONValue(appData[dsAppInfo], "1.2.51.0.0")
 		app.Summary = util.GetJSONValue(appData[dsAppInfo], "1.2.73.0.1")
